@@ -10,6 +10,8 @@ import (
 )
 
 func main() {
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fs)
 	http.HandleFunc("/ascii", handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
