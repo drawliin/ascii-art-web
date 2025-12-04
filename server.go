@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
 	"web/helpers"
 )
 
 func main() {
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/", fs)
+	tmpl := template.Must(template.ParseFiles("template/index.html"))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
+		tmpl.Execute(w, nil)
+	})
 	http.HandleFunc("/ascii", handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -23,12 +27,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	r.ParseForm()
 	//////////////
-	input := r.Form["input"][0]
+	input := strings.ReplaceAll(r.Form["input"][0], "\r", "")
 	fileName := r.Form["banner"][0]
 
 	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", fileName))
 	if err != nil {
-		fmt.Fprintf(w,"error: %v\n", err)
+		fmt.Fprintf(w, "error: %v\n", err)
 		return
 	}
 
@@ -36,7 +40,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	arr := helpers.Split2D(string(bytes))
 
 	// Split the input by NewLine
-	lines := strings.Split(input, "\\n")
+	lines := strings.Split(input, "\n")
 
 	// check trailing empty string
 	if len([]rune(input)) > 1 && helpers.ContainOnlyNewLines(input) {
