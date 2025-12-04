@@ -12,9 +12,13 @@ import (
 )
 
 var result string
+
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Render the main HTML template and inject the generated ASCII art.
 		tmpl := template.Must(template.ParseFiles("template/index.html"))
+		
+		// We pass "Art" into the template so index.html can display the result.
 		tmpl.Execute(w, map[string]string{
 			"Art": result,
 		})
@@ -30,7 +34,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//tmpl := template.Must(template.ParseFiles("template/ascii-art-web.html"))
+	// tmpl := template.Must(template.ParseFiles("template/ascii-art-web.html"))
 
 	r.ParseForm()
 	input := strings.ReplaceAll(r.Form["input"][0], "\r", "")
@@ -72,10 +76,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			res.WriteRune('\n')
 		}
 	}
+	// filling result with the output to print it in root "/"
 	result = res.String()
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-	//tmpl.Execute(w, data)
-	//fmt.Fprintf(w, "%s\n", res.String())
 
-	//fmt.Fprintf(w, "\n\nYour Data %q", r.PostForm)
+	// return to root "/" and show data
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
+	// tmpl.Execute(w, data)
+	// fmt.Fprintf(w, "%s\n", res.String())
+	// fmt.Fprintf(w, "\n\nYour Data %q", r.PostForm)
 }
