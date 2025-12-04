@@ -11,11 +11,15 @@ import (
 	"web/helpers"
 )
 
+var result string
 func main() {
-	tmpl := template.Must(template.ParseFiles("template/index.html"))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
-		tmpl.Execute(w, nil)
+		tmpl := template.Must(template.ParseFiles("template/index.html"))
+		tmpl.Execute(w, map[string]string{
+			"Art": result,
+		})
 	})
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/ascii", handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -25,8 +29,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid Route", http.StatusMethodNotAllowed)
 		return
 	}
+
+	//tmpl := template.Must(template.ParseFiles("template/ascii-art-web.html"))
+
 	r.ParseForm()
-	//////////////
 	input := strings.ReplaceAll(r.Form["input"][0], "\r", "")
 	fileName := r.Form["banner"][0]
 
@@ -66,7 +72,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			res.WriteRune('\n')
 		}
 	}
-	fmt.Fprint(w, res.String())
-	//////////////
-	fmt.Fprintf(w, "\n\nYour Data %q", r.PostForm)
+	result = res.String()
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+	//tmpl.Execute(w, data)
+	//fmt.Fprintf(w, "%s\n", res.String())
+
+	//fmt.Fprintf(w, "\n\nYour Data %q", r.PostForm)
 }
