@@ -17,14 +17,18 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Render the main HTML template and inject the generated ASCII art.
 		tmpl := template.Must(template.ParseFiles("template/index.html"))
-		
+
 		// We pass "Art" into the template so index.html can display the result.
 		tmpl.Execute(w, map[string]string{
 			"Art": result,
 		})
 	})
+
+	// serve static files like (css || js) so the html can access them if needed
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
 	http.HandleFunc("/ascii", handler)
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -69,7 +73,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				if c >= 32 && c <= 126 {
 					res.WriteString(arr[c-32][j])
 				} else {
-					fmt.Fprintf(w, "error: unsupported character: %q\n", c)
+					result = fmt.Sprintf("error: unsupported character: %q\n", c)
+					http.Redirect(w, r, "/", http.StatusSeeOther)
 					return
 				}
 			}
