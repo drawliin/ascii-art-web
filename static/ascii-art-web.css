@@ -1,89 +1,119 @@
-body{
-    background-color: black;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    min-height: 100vh;
+body {
+    background: hsl(240, 5%, 10%);
+    background-image: url("./noise.png");
+    background-size: 200px;
     
-}
-
-label{
-    cursor: pointer;
-    color:green
-}
-
-h1{
-    color:black;
-    background-color: green;
-    transform: skewX(-10deg);
-}
-
-form{
-    gap: 20px;
-}
-
-textarea{
-    display: block;
+    font-family: "Poppins";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    margin: 0 auto;
-    background-color: green;
-    border: 0;
-    color: black;
-    font-weight: bold;
-    font-size: large;
-    width: 60vw;
-    height: 100px;
-    resize: none;
+    min-height: 100vh;
+    margin: 0;
 }
 
-input{
+h1 {
+    color: hsla(0, 0%, 0%, 0.678);
+    background: #2fbf70ef;
+    padding: 8px 20px;
+    transform: skewX(-10deg);
+    border-radius: 4px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+textarea {
+    width: min(80vw, 500px);
+    height: 120px;
+    margin: 12px 0;
+    padding: 8px 12px;
+    background: #2fbf70ef;
+    border: none;
+    border-radius: 10px;
+    color: black;
+    font-weight: 700;
+    font-size: 1.1rem;
+    resize: none;
+    font-family: "Poppins";
+    transition: outline .05s;
+}
+textarea:focus {
+    outline: 2px solid #34c759;
+    background-color: #2fbf70b4;
+}
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.836);
+}
+
+label {
     cursor: pointer;
-    accent-color: greenyellow;
+    color: hsla(147, 61%, 47%, 0.719);
+    margin: 4px 0;
+    transition: color 0.2s;
+}
+
+input {
+    cursor: pointer;
+    accent-color: #83f7b7;
 }
 
 label:has(input:checked) {
-    font-weight: bold;
-    color: greenyellow;
+    font-weight: 500;
+    color: #83f7b7;
 }
 
-label:has(input:hover){
-    color:greenyellow;
+label:hover {
+    color: #2fc171f6;
 }
 
 button {
-  display: block;
-  margin: 0 auto;
-  
-  transform: skewX(-10deg);
-  background-color: green;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  cursor: pointer;
+    margin-top: 15px;
+    background: #2fbf71;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: "Poppins";
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background 0.3s, color 0.3s;
 }
 
-button:hover{
-    background-color: greenyellow;
-    color:green;
+button:hover {
+    background: #2fc171b7;
 }
 
-.output{
-    color:green;
-    font-size: small;
-
+.output {
+    color: #2fbf70ef;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    max-width: 90vw;
     opacity: 0;
-    animation: fadeIn 1.0s forwards;
+    animation: fadeIn 0.5s forwards;
 }
 
 @keyframes fadeIn {
-  to {
-    opacity: 1;
-    text-shadow: 0 0 7px green;
-    transform: translateY(0);
+    from {
+        opacity: 0;
+        transform: translateY(30px);
     }
-    from{
-        transform: translateY(50px);
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        text-shadow: 0 0 7px green;
+    }
+}
+
+@media (min-width: 1200px) {
+    textarea {
+        width: 40vw;
     }
 }
