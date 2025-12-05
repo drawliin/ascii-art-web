@@ -5,13 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ascii-art-web</title>
+    <link rel="stylesheet" href="../static/ascii-art-web.css">
 </head>
 
 <body>
+    <h1>- Ascii-art Web -</h1>
     <form action="http://localhost:8080/ascii" method="POST">
         <textarea placeholder="ex: Hello" name="input" required>{{.PrevInput}}</textarea>
         <label for="standard">
-            <input id="standard" type="radio" value="standard" name="banner" required>
+            <input id="standard" type="radio" value="standard" name="banner" required checked>
             Standard
         </label>
         <label for="shadow">
@@ -24,7 +26,7 @@
         </label>
         <button type="submit">Submit</button>
     </form>
-    <pre>{{.Art}}</pre>
+    <pre class="output">{{.Art}}</pre>
 </body>
 
 </html>
