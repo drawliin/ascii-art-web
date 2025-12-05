@@ -11,7 +11,8 @@ import (
 	"web/helpers"
 )
 
-var result string
+var userInput string
+var art string = ""
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +21,8 @@ func main() {
 
 		// We pass "Art" into the template so index.html can display the result.
 		tmpl.Execute(w, map[string]string{
-			"Art": result,
+			"Art":       art,
+			"PrevInput": userInput,
 		})
 	})
 
@@ -41,7 +43,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// tmpl := template.Must(template.ParseFiles("template/ascii-art-web.html"))
 
 	r.ParseForm()
-	input := strings.ReplaceAll(r.Form["input"][0], "\r", "")
+	userInput = strings.ReplaceAll(r.Form["input"][0], "\r", "")
 	fileName := r.Form["banner"][0]
 
 	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", fileName))
@@ -54,10 +56,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	arr := helpers.Split2D(string(bytes))
 
 	// Split the input by NewLine
-	lines := strings.Split(input, "\n")
+	lines := strings.Split(userInput, "\n")
 
 	// check trailing empty string
-	if len([]rune(input)) > 1 && helpers.ContainOnlyNewLines(input) {
+	if len([]rune(userInput)) > 1 && helpers.ContainOnlyNewLines(userInput) {
 		lines = lines[:len(lines)-1]
 	}
 
@@ -73,7 +75,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				if c >= 32 && c <= 126 {
 					res.WriteString(arr[c-32][j])
 				} else {
-					result = fmt.Sprintf("error: unsupported character: %q\n", c)
+					art = fmt.Sprintf("error: unsupported character: %q\n", c)
 					http.Redirect(w, r, "/", http.StatusSeeOther)
 					return
 				}
@@ -82,7 +84,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// filling result with the output to print it in root "/"
-	result = res.String()
+	art = res.String()
 
 	// return to root "/" and show data
 	http.Redirect(w, r, "/", http.StatusSeeOther)

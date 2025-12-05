@@ -9,7 +9,7 @@
 
 <body>
     <form action="http://localhost:8080/ascii" method="POST">
-        <textarea placeholder="ex: Hello" name="input" required></textarea>
+        <textarea placeholder="ex: Hello" name="input" required>{{.PrevInput}}</textarea>
         <label for="standard">
             <input id="standard" type="radio" value="standard" name="banner" required>
             Standard
