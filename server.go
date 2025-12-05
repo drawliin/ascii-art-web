@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -31,7 +30,11 @@ func main() {
 
 	http.HandleFunc("/ascii", handler)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	fmt.Printf("%s\n", "Server Starting on port 8080...")
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
