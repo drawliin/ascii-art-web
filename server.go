@@ -67,7 +67,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	lines := strings.Split(userInput, "\n")
 
 	// check trailing empty string
-	if len([]rune(userInput)) > 1 && helpers.ContainOnlyNewLines(userInput) {
+	if len(lines) > 1 && helpers.ContainOnlyNewLines(lines) {
 		lines = lines[:len(lines)-1]
 	}
 
