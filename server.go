@@ -56,6 +56,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	userInput = strings.ReplaceAll(r.Form["input"][0], "\r", "")
+	if userInput == "" {
+		http.Error(w, "Error: Bad request", http.StatusBadRequest)
+		return
+	}
 
 	if font = r.Form["banner"][0]; !validFont(font) {
 		http.Error(w, "Error: Not Found ", http.StatusNotFound)
@@ -64,7 +68,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", font))
 	if err != nil {
-		fmt.Fprintf(w, "error: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error: Internal Server error"))
 		return
 	}
 
