@@ -39,7 +39,7 @@ func main() {
 	// serve static files like (css || js) so the html can access them if needed
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	http.HandleFunc("/ascii", handler)
+	http.HandleFunc("/ascii-art", handler)
 
 	fmt.Printf("%s\n", "Server Starting on port 8080...")
 	err := http.ListenAndServe(":8080", nil)
