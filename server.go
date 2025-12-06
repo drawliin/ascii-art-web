@@ -11,6 +11,7 @@ import (
 )
 
 var userInput string
+var font string = "standard"
 var art string = ""
 
 func main() {
@@ -22,6 +23,7 @@ func main() {
 		tmpl.Execute(w, map[string]string{
 			"Art":       art,
 			"PrevInput": userInput,
+			"Font":      font,
 		})
 	})
 
@@ -47,9 +49,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	userInput = strings.ReplaceAll(r.Form["input"][0], "\r", "")
-	fileName := r.Form["banner"][0]
+	font = r.Form["banner"][0]
 
-	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", fileName))
+	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", font))
 	if err != nil {
 		fmt.Fprintf(w, "error: %v\n", err)
 		return
