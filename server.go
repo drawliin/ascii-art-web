@@ -43,8 +43,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// tmpl := template.Must(template.ParseFiles("template/ascii-art-web.html"))
-
 	r.ParseForm()
 	userInput = strings.ReplaceAll(r.Form["input"][0], "\r", "")
 	fileName := r.Form["banner"][0]
@@ -91,8 +89,4 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// return to root "/" and show data
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-
-	// tmpl.Execute(w, data)
-	// fmt.Fprintf(w, "%s\n", res.String())
-	// fmt.Fprintf(w, "\n\nYour Data %q", r.PostForm)
 }
