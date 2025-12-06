@@ -16,6 +16,11 @@ var art string = ""
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.Error(w, "Error: 404 Not found", http.StatusNotFound)
+			return
+		}
+
 		// Render the main HTML template and inject the generated ASCII art.
 		tmpl := template.Must(template.ParseFiles("template/index.html"))
 
@@ -41,7 +46,7 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid Route", http.StatusMethodNotAllowed)
+		http.Error(w, "Error: Bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -81,7 +86,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					res.WriteString(arr[c-32][j])
 				} else {
 					art = fmt.Sprintf("error: unsupported character: %q\n", c)
-					http.Redirect(w, r, "/", http.StatusSeeOther)
+					http.Error(w, "Error: Internal error", http.StatusInternalServerError)
 					return
 				}
 			}
