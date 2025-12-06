@@ -22,7 +22,11 @@ func main() {
 		}
 
 		// Render the main HTML template and inject the generated ASCII art.
-		tmpl := template.Must(template.ParseFiles("template/index.html"))
+		tmpl, err := template.ParseFiles("template/index.html")
+		if err != nil {
+			http.Error(w, "Error: 404 Not found", http.StatusNotFound)
+			return
+		}
 
 		// We pass "Art" into the template so index.html can display the result.
 		tmpl.Execute(w, map[string]string{
@@ -52,7 +56,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	userInput = strings.ReplaceAll(r.Form["input"][0], "\r", "")
-	font = r.Form["banner"][0]
+
+	if font = r.Form["banner"][0]; !validFont(font) {
+		http.Error(w, "Error: Not Found ", http.StatusNotFound)
+		return
+	}
 
 	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", font))
 	if err != nil {
@@ -96,4 +104,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// return to root "/" and show data
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func validFont(s string) bool {
+	switch s {
+	case "standard", "shadow", "thinkertoy":
+		return true
+	default:
+		return false
+	}
 }
