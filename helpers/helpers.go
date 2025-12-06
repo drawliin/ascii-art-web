@@ -28,9 +28,9 @@ func Split2D(s string) [][]string {
 	return arr
 }
 
-func ContainOnlyNewLines(s string) bool {
-	for i := 0; i < len(s); i += 2 {
-		if i+2 > len(s) || s[i:i+2] != "\\n" {
+func ContainOnlyNewLines(arr []string) bool {
+	for _, c := range arr {
+		if c != "" {
 			return false
 		}
 	}
