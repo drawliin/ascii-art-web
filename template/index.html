@@ -15,17 +15,17 @@
         <textarea name="input" placeholder="ex: Hello" required>{{.PrevInput}}</textarea>
         <div>
             <label>
-                <input type="radio" name="banner" value="standard" required checked>
+                <input type="radio" name="banner" value="standard" required {{if eq .Font "standard"}}checked{{end}}>
                 Standard
             </label>
     
             <label>
-                <input type="radio" name="banner" value="shadow">
+                <input type="radio" name="banner" value="shadow" {{if eq .Font "shadow"}}checked{{end}}>
                 Shadow
             </label>
     
             <label>
-                <input type="radio" name="banner" value="thinkertoy">
+                <input type="radio" name="banner" value="thinkertoy" {{if eq .Font "thinkertoy"}}checked{{end}}>
                 Thinkertoy
             </label>
         </div>
