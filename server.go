@@ -1,5 +1,4 @@
-// Notes to Handle 
-// r.ParseForm() -- it can return an error
+// Notes to Handle
 // if i generate an ascii art and refreshed the page.. ill still see the old inputed art no matter how much i refresh the page
 
 package main
@@ -58,7 +57,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Error: Internal Server error", http.StatusInternalServerError)
+		return
+	}
 	userInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
 	if userInput == "" {
 		http.Error(w, "Error: Bad request", http.StatusBadRequest)
