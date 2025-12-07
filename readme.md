@@ -38,36 +38,52 @@ Open your browser and go to:
   http://localhost:8080
 ```
 
-## Implementation details (Algorithm)
+## Implementation Details (Algorithm)
 
-1. The server starts and listens on port 8080.
+### 1. Server Startup
+- The server starts and listens on port **8080**.
 
-2. When a client sends a GET / request:
-
+### 2. Handling `GET /`
+When a client sends a `GET /` request:
 - The server loads the HTML template.
+- It renders the main page and displays any previously generated result.
 
-- It renders the main page and displays any previous result.
+### 3. Handling `POST /ascii-art`
+When a client sends a `POST /ascii-art` request, the following steps are executed:
 
-3. When the client sends a POST /ascii-art request:
+1. **Request Validation**
+   - The server validates that the HTTP method is correct.
 
-- The server validates the HTTP method.
+2. **Form Data Processing**
+   - Reads the submitted form data:
+     - Input text
+     - Selected banner style
+   - Removes all carriage return characters (`\r`) from the input.
+   - Verifies that the input text is not empty.
 
-- It reads the form data (text and selected banner).
+3. **Banner Loading**
+   - Loads the corresponding banner file:
+     - `standard.txt`
+     - `shadow.txt`
+     - `thinkertoy.txt`
 
-- It removes carriage return characters (\r) from the input text and validates that the text is not empty.
+4. **Banner Parsing**
+   - Splits the banner file into a **2D data structure** representing character patterns.
 
-- It loads the corresponding banner file (standard.txt, shadow.txt, or thinkertoy.txt).
+5. **ASCII Art Generation**
+   - Iterates over each character of the input text.
+   - Constructs the ASCII art **line by line** using the parsed banner data.
 
-- It splits the banner file into a 2D structure representing characters.
+6. **Response Handling**
+   - Stores the generated result.
+   - Sends the result back to the client by:
+     - Redirecting, **or**
+     - Directly rendering the page.
 
-- It processes each character of the input text and builds the ASCII art line by line.
+### 4. Error Handling
 
-- It stores the result and sends it back to be displayed (either by redirecting or rendering directly).
+The server responds with appropriate HTTP status codes in case of failure:
 
-4. If an error occurs:
-
-- 400 Bad Request is returned for invalid requests.
-
-- 404 Not Found is returned if a banner or template is missing.
-
-- 500 Internal Server Error is returned for unexpected failures.
+- `400 Bad Request` – Invalid or malformed requests
+- `404 Not Found` – Missing banner or template files
+- `500 Internal Server Error` – Unexpected server-side errors
