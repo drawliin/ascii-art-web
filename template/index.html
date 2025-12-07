@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,20 +13,20 @@
     <h1>- Ascii-art Web -</h1>
 
     <form action="http://localhost:8080/ascii-art" method="POST">
-        <textarea name="input" placeholder="ex: Hello" required>{{.PrevInput}}</textarea>
+        <textarea name="input" placeholder="ex: Hello" required>{{.UserInput}}</textarea>
         <div>
             <label>
-                <input type="radio" name="banner" value="standard" required {{if eq .Font "standard"}}checked{{end}}>
+                <input type="radio" name="banner" value="standard" required {{if eq .Font "standard" }}checked{{end}}>
                 Standard
             </label>
-    
+
             <label>
-                <input type="radio" name="banner" value="shadow" {{if eq .Font "shadow"}}checked{{end}}>
+                <input type="radio" name="banner" value="shadow" {{if eq .Font "shadow" }}checked{{end}}>
                 Shadow
             </label>
-    
+
             <label>
-                <input type="radio" name="banner" value="thinkertoy" {{if eq .Font "thinkertoy"}}checked{{end}}>
+                <input type="radio" name="banner" value="thinkertoy" {{if eq .Font "thinkertoy" }}checked{{end}}>
                 Thinkertoy
             </label>
         </div>
@@ -34,8 +35,13 @@
     </form>
 
     {{if .Art}}
-    <pre class="output">{{.Art}}</pre>
+        <pre class="output">{{.Art}}</pre>
+    {{else}}
+        {{if .ErrorMsg}}
+            <p class="error">{{.ErrorMsg}}</p>
+        {{end}}
     {{end}}
 
 </body>
+
 </html>
