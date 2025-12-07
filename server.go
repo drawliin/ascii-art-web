@@ -13,9 +13,12 @@ import (
 	"web/helpers"
 )
 
-var userInput string
-var font string = "standard"
-var art string = ""
+type PageData struct {
+	UserInput string
+	Font      string
+	Art       string
+	ErrorMsg  string
+}
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -32,10 +35,10 @@ func main() {
 		}
 
 		// We pass "Art" into the template so index.html can display the result.
-		tmpl.Execute(w, map[string]string{
-			"Art":       art,
-			"PrevInput": userInput,
-			"Font":      font,
+		tmpl.Execute(w, PageData{
+			UserInput: "",
+			Font:      "standard",
+			Art:       "",
 		})
 	})
 
@@ -62,18 +65,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error: Internal Server error", http.StatusInternalServerError)
 		return
 	}
-	userInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
-	if userInput == "" {
+	data := PageData{}
+	data.UserInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
+	if data.UserInput == "" {
 		http.Error(w, "Error: Bad request", http.StatusBadRequest)
 		return
 	}
 
-	if font = r.FormValue("banner"); !validFont(font) {
+	if data.Font = r.FormValue("banner"); !validFont(data.Font) {
 		http.Error(w, "Error: Not Found ", http.StatusNotFound)
 		return
 	}
 
-	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", font))
+	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", data.Font))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error: Internal Server error"))
@@ -84,11 +88,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	arr := helpers.Split2D(string(bytes))
 
 	// Split the input by NewLine
-	lines := strings.Split(userInput, "\n")
+	lines := strings.Split(data.UserInput, "\n")
 
 	// check trailing empty string
 	if len(lines) > 1 && helpers.ContainOnlyNewLines(lines) {
 		lines = lines[:len(lines)-1]
+	}
+
+	tmpl, err := template.ParseFiles("template/index.html")
+	if err != nil {
+		http.Error(w, "Error: 404 Not found", http.StatusNotFound)
+		return
 	}
 
 	var res strings.Builder
@@ -103,8 +113,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				if c >= 32 && c <= 126 {
 					res.WriteString(arr[c-32][j])
 				} else {
-					art = fmt.Sprintf("error: unsupported character: %q\n", c)
-					http.Error(w, "Error: Internal error", http.StatusInternalServerError)
+					data.ErrorMsg = fmt.Sprintf("error: unsupported character: %q\n", c)
+					tmpl.Execute(w, data)
 					return
 				}
 			}
@@ -112,10 +122,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// filling result with the output to print it in root "/"
-	art = res.String()
-
-	// return to root "/" and show data
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	data.Art = res.String()
+	tmpl.Execute(w, data)
 }
 
 func validFont(s string) bool {
