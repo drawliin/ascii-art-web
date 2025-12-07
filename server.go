@@ -1,5 +1,6 @@
 // Notes to Handle 
 // r.ParseForm() -- it can return an error
+// if i generate an ascii art and refreshed the page.. ill still see the old inputed art no matter how much i refresh the page
 
 package main
 
