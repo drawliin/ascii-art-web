@@ -1,3 +1,6 @@
+// Notes to Handle 
+// r.ParseForm() -- it can return an error
+
 package main
 
 import (
@@ -55,13 +58,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	userInput = strings.ReplaceAll(r.Form["input"][0], "\r", "")
+	userInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
 	if userInput == "" {
 		http.Error(w, "Error: Bad request", http.StatusBadRequest)
 		return
 	}
 
-	if font = r.Form["banner"][0]; !validFont(font) {
+	if font = r.FormValue("banner"); !validFont(font) {
 		http.Error(w, "Error: Not Found ", http.StatusNotFound)
 		return
 	}
