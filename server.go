@@ -1,6 +1,3 @@
-// Notes to Handle
-// if i generate an ascii art and refreshed the page.. ill still see the old inputed art no matter how much i refresh the page
-
 package main
 
 import (
@@ -20,6 +17,8 @@ type PageData struct {
 	ErrorMsg  string
 }
 
+const port = "8080"
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
@@ -28,7 +27,7 @@ func main() {
 		}
 
 		// Render the main HTML template and inject the generated ASCII art.
-		tmpl, err := template.ParseFiles("template/index.html")
+		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
 			http.Error(w, "Error: 404 Not found", http.StatusNotFound)
 			return
@@ -47,8 +46,8 @@ func main() {
 
 	http.HandleFunc("/ascii-art", handler)
 
-	fmt.Printf("%s\n", "Server Starting on port 8080...")
-	err := http.ListenAndServe(":8080", nil)
+	fmt.Printf("Server Starting on port %s...\n", port)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
@@ -95,7 +94,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		lines = lines[:len(lines)-1]
 	}
 
-	tmpl, err := template.ParseFiles("template/index.html")
+	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		http.Error(w, "Error: 404 Not found", http.StatusNotFound)
 		return
@@ -110,8 +109,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		for j := range 8 {
 			for _, c := range line {
 				// check if valid and printable ascii
-				if c >= 32 && c <= 126 {
-					res.WriteString(arr[c-32][j])
+				if c >= ' ' && c <= '~' {
+					res.WriteString(arr[c-' '][j])
 				} else {
 					data.ErrorMsg = fmt.Sprintf("error: unsupported character: %q\n", c)
 					tmpl.Execute(w, data)
