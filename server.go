@@ -26,6 +26,11 @@ func main() {
 			return
 		}
 
+		if r.Method != http.MethodGet {
+			http.Error(w, "Error: Not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		// Render the main HTML template
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
@@ -54,7 +59,7 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Error: Bad request", http.StatusBadRequest)
+		http.Error(w, "Error: Not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
