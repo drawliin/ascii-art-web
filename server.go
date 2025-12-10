@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -81,7 +82,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bytes, err := os.ReadFile(fmt.Sprintf("%s.txt", data.Font))
+	bytesF, err := os.ReadFile(fmt.Sprintf("%s.txt", data.Font))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error: Internal Server Error"))
@@ -89,7 +90,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Split into 2d Slice
-	fontTxt := strings.ReplaceAll(string(bytes), "\r", "")
+	fontTxt := strings.ReplaceAll(string(bytesF), "\r", "")
 	arr := helpers.Split2D(fontTxt)
 
 	// Split the input by NewLine
@@ -129,7 +130,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	// filling result with the output to print it in root "/"
 	data.Art = res.String()
-	tmpl.Execute(w, data)
+
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, data)
+	if err != nil {
+		http.Error(w, "Error: 500 InternalServerError", http.StatusInternalServerError)
+		return
+	}
+	buf.WriteTo(w)
 }
 
 func validFont(s string) bool {
