@@ -102,7 +102,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		http.Error(w, "Error: 404 Not found", http.StatusNotFound)
+		http.Error(w, "Error: 500 InternalServerError", http.StatusInternalServerError)
 		return
 	}
 
@@ -119,6 +119,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					res.WriteString(arr[c-' '][j])
 				} else {
 					data.ErrorMsg = fmt.Sprintf("error: unsupported character: %q\n", c)
+					w.WriteHeader(http.StatusBadRequest)
 					tmpl.Execute(w, data)
 					return
 				}
