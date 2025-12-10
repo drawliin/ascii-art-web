@@ -38,12 +38,17 @@ func main() {
 			http.Error(w, "Error: 404 Not found", http.StatusNotFound)
 			return
 		}
-
-		tmpl.Execute(w, PageData{
+		var buf bytes.Buffer
+		err = tmpl.Execute(&buf, PageData{
 			UserInput: "",
 			Font:      "standard",
 			Art:       "",
 		})
+		if err != nil {
+			http.Error(w, "Error: 500 InternalServerError", http.StatusInternalServerError)
+			return
+		}
+		buf.WriteTo(w)
 	})
 
 	// serve static files like (css || js) so the html can access them if needed
