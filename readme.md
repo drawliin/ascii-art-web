@@ -84,6 +84,8 @@ When a client sends a `POST /ascii-art` request, the following steps are execute
 
 The server responds with appropriate HTTP status codes in case of failure:
 
+- `200 Okay` – No errors
 - `400 Bad Request` – Invalid or malformed requests
 - `404 Not Found` – Missing banner or template files
 - `500 Internal Server Error` – Unexpected server-side errors
+- `405 Method Not Allowed` – Inappropriate method used

@@ -8,7 +8,7 @@ func Split2D(s string) [][]string {
 	wordStart := 0
 	count := 0
 	for i := 0; i < len(s); i++ {
-		if s[i] == '\n' || s[i] == '\r' {
+		if s[i] == '\n' {
 			if s[wordStart:i] == "" {
 				if count == 8 {
 					arr = append(arr, symbol)

@@ -63,6 +63,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// parse data
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error: Internal Server error", http.StatusInternalServerError)
@@ -88,7 +89,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Split into 2d Slice
-	arr := helpers.Split2D(string(bytes))
+	fontTxt := strings.ReplaceAll(string(bytes), "\r", "")
+	arr := helpers.Split2D(fontTxt)
 
 	// Split the input by NewLine
 	lines := strings.Split(data.UserInput, "\n")
