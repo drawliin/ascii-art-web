@@ -95,10 +95,23 @@ button:hover {
 }
 
 .output {
+    margin: 50px 0 0 0;
+    font-size: 0.7rem;
     color: #2fbf70ef;
-    font-size: 0.9rem;
+    background-color: #0d1117; 
+    min-width: 60vw;
+    max-width: 80vw;
+    max-height: 400px;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: pre;
+    padding: 1rem;
+    border-radius: 15px;
+    box-shadow: inset 0 0 10px #00000083;
     opacity: 0;
     animation: fadeIn 0.5s forwards;
+    scrollbar-width: thin;
+    scrollbar-color: #34c759 #000000;
 }
 
 .error {
@@ -117,7 +130,7 @@ button:hover {
     to {
         opacity: 1;
         transform: translateY(0);
-        text-shadow: 0 0 10px green;
+        text-shadow: 0 0 10px hsl(120, 100%, 29%);
     }
 }
 @keyframes fadeInError {
