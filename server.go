@@ -28,7 +28,7 @@ func main() {
 		}
 
 		if r.Method != http.MethodGet {
-			http.Error(w, "Error: Not allowed", http.StatusMethodNotAllowed)
+			http.Error(w, "Error: 405 Not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 
@@ -124,7 +124,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				if c >= ' ' && c <= '~' {
 					res.WriteString(arr[c-' '][j])
 				} else {
-					data.ErrorMsg = fmt.Sprintf("error: unsupported character: %q\n", c)
+					data.ErrorMsg = fmt.Sprintf("Error: 400 unsupported character: %q\n", c)
 					w.WriteHeader(http.StatusBadRequest)
 					tmpl.Execute(w, data)
 					return
