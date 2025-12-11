@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -16,6 +17,7 @@ type PageData struct {
 	Font      string
 	Art       string
 	ErrorMsg  string
+	FileTxt   string
 }
 
 const port = "8080"
@@ -55,6 +57,8 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	http.HandleFunc("/ascii-art", handler)
+
+	http.HandleFunc("/download", downloadHandler)
 
 	fmt.Printf("Server Starting on port %s...\n", port)
 	err := http.ListenAndServe(":"+port, nil)
@@ -135,6 +139,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	// filling result with the output to print it in root "/"
 	data.Art = res.String()
+	count := 1
+	for {
+		downloadFile, err := os.Create(fmt.Sprintf("download%d.txt", count))
+		if err != nil {
+			count++
+			continue
+		}
+		data.FileTxt = res.String()
+		downloadFile.WriteString(data.FileTxt)
+		break
+	}
 
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, data)
@@ -143,6 +158,32 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	buf.WriteTo(w)
+}
+
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Error: Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Error: 500 InternalServerError", http.StatusInternalServerError)
+		return
+	}
+	fileName := r.FormValue("fileName")
+	if fileName == "" {
+		http.Error(w, "Error: Bad Request", http.StatusBadRequest)
+		return
+	}
+	f, err := os.Open(fileName)
+    if err != nil {
+        http.Error(w, "File not found", http.StatusNotFound)
+        return
+    }
+    defer f.Close()
+	w.Header().Set("Content-Type", "application/txt")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
+	io.Copy(w, f)
 }
 
 func validFont(s string) bool {

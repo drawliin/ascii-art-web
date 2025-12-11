@@ -36,6 +36,9 @@
 
     {{if .Art}}
         <pre class="output">{{.Art}}</pre>
+        <form action="/download" method="GET">
+            <button type="download" name="fileName" value="{{ .FileTxt }}">Download</button>
+        </form>
     {{else}}
         {{if .ErrorMsg}}
             <p class="error">{{.ErrorMsg}}</p>
