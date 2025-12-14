@@ -139,15 +139,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	data := PageData{}
 	data.UserInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
 	if data.UserInput == "" {
-		w.WriteHeader(500)
 		errtmpl, tmperr := template.ParseFiles("templates/error.html")
 		if tmperr != nil {
+			w.WriteHeader(500)
 			w.Write([]byte("500 Internal Server Error"))
 			return
 		}
+		w.WriteHeader(400)
 		errtmpl.Execute(w, AnError{
-			Code:    500,
-			Message: "Internal Server Error",
+			Code:    400,
+			Message: "Bad Request",
 		})
 		return
 	}
