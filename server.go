@@ -27,8 +27,10 @@ const port = "8080"
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
-			errtmpl, err := template.ParseFiles("templates/error.html")
-			if err != nil {
+			errtmpl, tmperr := template.ParseFiles("templates/error.html")
+			if tmperr != nil {
+				w.WriteHeader(500)
+				w.Write([]byte("500 Internal Server Error"))
 				return
 			}
 			w.WriteHeader(404)
@@ -40,8 +42,10 @@ func main() {
 		}
 
 		if r.Method != http.MethodGet {
-			errtmpl, err := template.ParseFiles("templates/error.html")
-			if err != nil {
+			errtmpl, tmperr := template.ParseFiles("templates/error.html")
+			if tmperr != nil {
+				w.WriteHeader(500)
+				w.Write([]byte("500 Internal Server Error"))
 				return
 			}
 			w.WriteHeader(405)
@@ -55,11 +59,12 @@ func main() {
 		// Render the main HTML template
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
-			errtmpl, err := template.ParseFiles("templates/error.html")
-			if err != nil {
+			w.WriteHeader(500)
+			errtmpl, tmperr := template.ParseFiles("templates/error.html")
+			if tmperr != nil {
+				w.Write([]byte("500 Internal Server Error"))
 				return
 			}
-			w.WriteHeader(500)
 			errtmpl.Execute(w, AnError{
 				Code:    500,
 				Message: "Internal Server Error",
@@ -73,11 +78,12 @@ func main() {
 			Art:       "",
 		})
 		if err != nil {
-			errtmpl, err := template.ParseFiles("templates/error.html")
-			if err != nil {
+			w.WriteHeader(500)
+			errtmpl, tmperr := template.ParseFiles("templates/error.html")
+			if tmperr != nil {
+				w.Write([]byte("500 Internal Server Error"))
 				return
 			}
-			w.WriteHeader(500)
 			errtmpl.Execute(w, AnError{
 				Code:    500,
 				Message: "Internal Server Error",
@@ -101,8 +107,10 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		errtmpl, err := template.ParseFiles("templates/error.html")
-		if err != nil {
+		errtmpl, tmperr := template.ParseFiles("templates/error.html")
+		if tmperr != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("500 Internal Server Error"))
 			return
 		}
 		w.WriteHeader(405)
@@ -116,11 +124,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// parse data
 	err := r.ParseForm()
 	if err != nil {
-		errtmpl, err := template.ParseFiles("templates/error.html")
-		if err != nil {
+		w.WriteHeader(500)
+		errtmpl, tmperr := template.ParseFiles("templates/error.html")
+		if tmperr != nil {
+			w.Write([]byte("500 Internal Server Error"))
 			return
 		}
-		w.WriteHeader(500)
 		errtmpl.Execute(w, AnError{
 			Code:    500,
 			Message: "Internal Server Error",
@@ -130,21 +139,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	data := PageData{}
 	data.UserInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
 	if data.UserInput == "" {
-		errtmpl, err := template.ParseFiles("templates/error.html")
-		if err != nil {
+		w.WriteHeader(500)
+		errtmpl, tmperr := template.ParseFiles("templates/error.html")
+		if tmperr != nil {
+			w.Write([]byte("500 Internal Server Error"))
 			return
 		}
-		w.WriteHeader(400)
 		errtmpl.Execute(w, AnError{
-			Code:    400,
-			Message: "Bad Request",
+			Code:    500,
+			Message: "Internal Server Error",
 		})
 		return
 	}
 
 	if data.Font = r.FormValue("banner"); !validFont(data.Font) {
-		errtmpl, err := template.ParseFiles("templates/error.html")
-		if err != nil {
+		errtmpl, tmperr := template.ParseFiles("templates/error.html")
+		if tmperr != nil {
+			w.WriteHeader(500)
+			w.Write([]byte("500 Internal Server Error"))
 			return
 		}
 		w.WriteHeader(400)
@@ -157,11 +169,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	bytesF, err := os.ReadFile(fmt.Sprintf("%s.txt", data.Font))
 	if err != nil {
-		errtmpl, err := template.ParseFiles("templates/error.html")
-		if err != nil {
+		w.WriteHeader(500)
+		errtmpl, tmperr := template.ParseFiles("templates/error.html")
+		if tmperr != nil {
+			w.Write([]byte("500 Internal Server Error"))
 			return
 		}
-		w.WriteHeader(500)
 		errtmpl.Execute(w, AnError{
 			Code:    500,
 			Message: "Internal Server Error",
@@ -183,11 +196,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		errtmpl, err := template.ParseFiles("templates/error.html")
-		if err != nil {
+		w.WriteHeader(500)
+		errtmpl, tmperr := template.ParseFiles("templates/error.html")
+		if tmperr != nil {
+			w.Write([]byte("500 Internal Server Error"))
 			return
 		}
-		w.WriteHeader(500)
 		errtmpl.Execute(w, AnError{
 			Code:    500,
 			Message: "Internal Server Error",
@@ -222,11 +236,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, data)
 	if err != nil {
-		errtmpl, err := template.ParseFiles("templates/error.html")
-		if err != nil {
+		w.WriteHeader(500)
+		errtmpl, tmperr := template.ParseFiles("templates/error.html")
+		if tmperr != nil {
+			w.Write([]byte("500 Internal Server Error"))
 			return
 		}
-		w.WriteHeader(500)
 		errtmpl.Execute(w, AnError{
 			Code:    500,
 			Message: "Internal Server Error",
