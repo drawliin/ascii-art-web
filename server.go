@@ -35,7 +35,7 @@ func main() {
 		// Render the main HTML template
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
-			http.Error(w, "Error: 404 Not found", http.StatusNotFound)
+			http.Error(w, "Error: 500 InternalServerError", http.StatusInternalServerError)
 			return
 		}
 		var buf bytes.Buffer
