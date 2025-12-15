@@ -26,21 +26,21 @@ const port = "8080"
 
 func main() {
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/ascii-art", ascciHandler)
+	http.HandleFunc("/ascii-art", asciiHandler)
 
 	// file server for /static
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/static/" {
 			// prevent spying
-			errorPage(w, http.StatusNotFound)
+			errorPage(w, http.StatusNotFound, "Not Found")
 			return
 		}
 
 		path := "." + r.URL.Path
 		_, err := os.Stat(path)
 		if err != nil {
-			errorPage(w, http.StatusNotFound)
+			errorPage(w, http.StatusNotFound, "Not Found")
 			return
 		} else {
 			http.StripPrefix("/static/", fs).ServeHTTP(w, r)
@@ -56,19 +56,19 @@ func main() {
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		errorPage(w, http.StatusNotFound)
+		errorPage(w, http.StatusNotFound, "Not Found")
 		return
 	}
 
 	if r.Method != http.MethodGet {
-		errorPage(w, http.StatusMethodNotAllowed)
+		errorPage(w, http.StatusMethodNotAllowed, "Method Not Allowed")
 		return
 	}
 
 	// Render the main HTML template
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		errorPage(w, http.StatusInternalServerError)
+		errorPage(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 	var buf bytes.Buffer
@@ -78,39 +78,40 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		Art:       "",
 	})
 	if err != nil {
-		errorPage(w, http.StatusInternalServerError)
+		errorPage(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 	buf.WriteTo(w)
 }
 
-func ascciHandler(w http.ResponseWriter, r *http.Request) {
+func asciiHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		errorPage(w, http.StatusMethodNotAllowed)
+		errorPage(w, http.StatusMethodNotAllowed, "Method Not Allowed")
 		return
 	}
 
 	// parse data
 	err := r.ParseForm()
 	if err != nil {
-		errorPage(w, http.StatusInternalServerError)
+		errorPage(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 	data := PageData{}
 	data.UserInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
-	if data.UserInput == "" {
-		errorPage(w, http.StatusBadRequest)
+	if data.UserInput == "" || len(data.UserInput) > 2000 {
+		fmt.Println(len(data.UserInput))
+		errorPage(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
 
 	if data.Font = r.FormValue("banner"); !validFont(data.Font) {
-		errorPage(w, http.StatusBadRequest)
+		errorPage(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
 
 	bytesF, err := os.ReadFile(fmt.Sprintf("%s.txt", data.Font))
 	if err != nil {
-		errorPage(w, http.StatusInternalServerError)
+		errorPage(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 
@@ -128,7 +129,7 @@ func ascciHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		errorPage(w, http.StatusInternalServerError)
+		errorPage(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 
@@ -159,13 +160,13 @@ func ascciHandler(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, data)
 	if err != nil {
-		errorPage(w, http.StatusInternalServerError)
+		errorPage(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 	buf.WriteTo(w)
 }
 
-func errorPage(w http.ResponseWriter, status int) {
+func errorPage(w http.ResponseWriter, status int, message string) {
 	tmpl, err := template.ParseFiles("templates/error.html")
 	if err != nil {
 		// error in the error page *o*
@@ -176,8 +177,8 @@ func errorPage(w http.ResponseWriter, status int) {
 
 	w.WriteHeader(status)
 	tmpl.Execute(w, AnError{
-		Code:    404,
-		Message: "Not found",
+		Code:    status,
+		Message: message,
 	})
 }
 
