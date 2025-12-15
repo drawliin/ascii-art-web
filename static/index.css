@@ -34,7 +34,7 @@ form {
 textarea {
     width: min(80vw, 500px);
     height: 120px;
-    margin: 12px 0;
+    margin: 12px auto;
     padding: 8px 12px;
     background: #2fbf70ef;
     border: none;
@@ -56,6 +56,13 @@ textarea::placeholder {
     font-weight: 600;
     font-style: italic;
     color: rgba(245, 245, 245, 0.699);
+}
+
+form div {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 label {
@@ -152,5 +159,14 @@ button:hover {
 @media (min-width: 1200px) {
     textarea {
         width: 45vw;
+    }
+}
+@media (max-width: 470px) {
+    h1 {
+        font-size: 8vw;
+        padding: 5px 15px;
+    }
+    button {
+        width: 90%;
     }
 }
