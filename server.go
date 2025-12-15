@@ -25,78 +25,27 @@ type AnError struct {
 const port = "8080"
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			errtmpl, tmperr := template.ParseFiles("templates/error.html")
-			if tmperr != nil {
-				w.WriteHeader(500)
-				w.Write([]byte("500 Internal Server Error"))
-				return
-			}
-			w.WriteHeader(404)
-			errtmpl.Execute(w, AnError{
-				Code:    404,
-				Message: "Not found",
-			})
+	http.HandleFunc("/", rootHandler)
+	http.HandleFunc("/ascii-art", ascciHandler)
+
+	// file server for /static
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/static/" {
+			// prevent spying
+			errorPage(w, http.StatusNotFound)
 			return
 		}
 
-		if r.Method != http.MethodGet {
-			errtmpl, tmperr := template.ParseFiles("templates/error.html")
-			if tmperr != nil {
-				w.WriteHeader(500)
-				w.Write([]byte("500 Internal Server Error"))
-				return
-			}
-			w.WriteHeader(405)
-			errtmpl.Execute(w, AnError{
-				Code:    405,
-				Message: "Not allowed",
-			})
-			return
-		}
-
-		// Render the main HTML template
-		tmpl, err := template.ParseFiles("templates/index.html")
+		path := "." + r.URL.Path
+		_, err := os.Stat(path)
 		if err != nil {
-			w.WriteHeader(500)
-			errtmpl, tmperr := template.ParseFiles("templates/error.html")
-			if tmperr != nil {
-				w.Write([]byte("500 Internal Server Error"))
-				return
-			}
-			errtmpl.Execute(w, AnError{
-				Code:    500,
-				Message: "Internal Server Error",
-			})
+			errorPage(w, http.StatusNotFound)
 			return
+		} else {
+			http.StripPrefix("/static/", fs).ServeHTTP(w, r)
 		}
-		var buf bytes.Buffer
-		err = tmpl.Execute(&buf, PageData{
-			UserInput: "",
-			Font:      "standard",
-			Art:       "",
-		})
-		if err != nil {
-			w.WriteHeader(500)
-			errtmpl, tmperr := template.ParseFiles("templates/error.html")
-			if tmperr != nil {
-				w.Write([]byte("500 Internal Server Error"))
-				return
-			}
-			errtmpl.Execute(w, AnError{
-				Code:    500,
-				Message: "Internal Server Error",
-			})
-			return
-		}
-		buf.WriteTo(w)
-	})
-
-	// serve static files like (css || js) so the html can access them if needed
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
-	http.HandleFunc("/ascii-art", handler)
+	}))
 
 	fmt.Printf("Server Starting on port %s...\n", port)
 	err := http.ListenAndServe(":"+port, nil)
@@ -105,81 +54,63 @@ func main() {
 	}
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		errorPage(w, http.StatusNotFound)
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		errorPage(w, http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Render the main HTML template
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		errorPage(w, http.StatusInternalServerError)
+		return
+	}
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, PageData{
+		UserInput: "",
+		Font:      "standard",
+		Art:       "",
+	})
+	if err != nil {
+		errorPage(w, http.StatusInternalServerError)
+		return
+	}
+	buf.WriteTo(w)
+}
+
+func ascciHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		errtmpl, tmperr := template.ParseFiles("templates/error.html")
-		if tmperr != nil {
-			w.WriteHeader(500)
-			w.Write([]byte("500 Internal Server Error"))
-			return
-		}
-		w.WriteHeader(405)
-		errtmpl.Execute(w, AnError{
-			Code:    405,
-			Message: "Not Allowed",
-		})
+		errorPage(w, http.StatusMethodNotAllowed)
 		return
 	}
 
 	// parse data
 	err := r.ParseForm()
 	if err != nil {
-		w.WriteHeader(500)
-		errtmpl, tmperr := template.ParseFiles("templates/error.html")
-		if tmperr != nil {
-			w.Write([]byte("500 Internal Server Error"))
-			return
-		}
-		errtmpl.Execute(w, AnError{
-			Code:    500,
-			Message: "Internal Server Error",
-		})
+		errorPage(w, http.StatusInternalServerError)
 		return
 	}
 	data := PageData{}
 	data.UserInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
 	if data.UserInput == "" {
-		errtmpl, tmperr := template.ParseFiles("templates/error.html")
-		if tmperr != nil {
-			w.WriteHeader(500)
-			w.Write([]byte("500 Internal Server Error"))
-			return
-		}
-		w.WriteHeader(400)
-		errtmpl.Execute(w, AnError{
-			Code:    400,
-			Message: "Bad Request",
-		})
+		errorPage(w, http.StatusBadRequest)
 		return
 	}
 
 	if data.Font = r.FormValue("banner"); !validFont(data.Font) {
-		errtmpl, tmperr := template.ParseFiles("templates/error.html")
-		if tmperr != nil {
-			w.WriteHeader(500)
-			w.Write([]byte("500 Internal Server Error"))
-			return
-		}
-		w.WriteHeader(400)
-		errtmpl.Execute(w, AnError{
-			Code:    400,
-			Message: "Bad Request",
-		})
+		errorPage(w, http.StatusBadRequest)
 		return
 	}
 
 	bytesF, err := os.ReadFile(fmt.Sprintf("%s.txt", data.Font))
 	if err != nil {
-		w.WriteHeader(500)
-		errtmpl, tmperr := template.ParseFiles("templates/error.html")
-		if tmperr != nil {
-			w.Write([]byte("500 Internal Server Error"))
-			return
-		}
-		errtmpl.Execute(w, AnError{
-			Code:    500,
-			Message: "Internal Server Error",
-		})
+		errorPage(w, http.StatusInternalServerError)
 		return
 	}
 
@@ -197,16 +128,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		w.WriteHeader(500)
-		errtmpl, tmperr := template.ParseFiles("templates/error.html")
-		if tmperr != nil {
-			w.Write([]byte("500 Internal Server Error"))
-			return
-		}
-		errtmpl.Execute(w, AnError{
-			Code:    500,
-			Message: "Internal Server Error",
-		})
+		errorPage(w, http.StatusInternalServerError)
 		return
 	}
 
@@ -237,19 +159,26 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, data)
 	if err != nil {
-		w.WriteHeader(500)
-		errtmpl, tmperr := template.ParseFiles("templates/error.html")
-		if tmperr != nil {
-			w.Write([]byte("500 Internal Server Error"))
-			return
-		}
-		errtmpl.Execute(w, AnError{
-			Code:    500,
-			Message: "Internal Server Error",
-		})
+		errorPage(w, http.StatusInternalServerError)
 		return
 	}
 	buf.WriteTo(w)
+}
+
+func errorPage(w http.ResponseWriter, status int) {
+	tmpl, err := template.ParseFiles("templates/error.html")
+	if err != nil {
+		// error in the error page *o*
+		w.WriteHeader(500)
+		w.Write([]byte("500 Internal Server Error"))
+		return
+	}
+
+	w.WriteHeader(status)
+	tmpl.Execute(w, AnError{
+		Code:    404,
+		Message: "Not found",
+	})
 }
 
 func validFont(s string) bool {
