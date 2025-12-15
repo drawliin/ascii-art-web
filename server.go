@@ -42,9 +42,8 @@ func main() {
 		if err != nil {
 			errorPage(w, http.StatusNotFound, "Not Found")
 			return
-		} else {
-			http.StripPrefix("/static/", fs).ServeHTTP(w, r)
 		}
+		http.StripPrefix("/static/", fs).ServeHTTP(w, r)
 	}))
 
 	fmt.Printf("Server Starting on port %s...\n", port)
