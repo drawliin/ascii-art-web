@@ -143,7 +143,7 @@ func asciiHandler(w http.ResponseWriter, r *http.Request) {
 				if c >= ' ' && c <= '~' {
 					res.WriteString(arr[c-' '][j])
 				} else {
-					data.ErrorMsg = fmt.Sprintf("Error: 400 unsupported character: %q\n", c)
+					data.ErrorMsg = fmt.Sprintf("Unsupported character: %q\n", c)
 					w.WriteHeader(http.StatusBadRequest)
 					tmpl.Execute(w, data)
 					return
