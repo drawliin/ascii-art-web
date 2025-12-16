@@ -98,7 +98,6 @@ func asciiHandler(w http.ResponseWriter, r *http.Request) {
 	data := PageData{}
 	data.UserInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
 	if data.UserInput == "" || len(data.UserInput) > 2000 {
-		fmt.Println(len(data.UserInput))
 		errorPage(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
