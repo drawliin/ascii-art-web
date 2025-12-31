@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -17,7 +16,6 @@ type PageData struct {
 	Font      string
 	Art       string
 	ErrorMsg  string
-	FileTxt   string
 }
 
 const port = "8080"
@@ -139,17 +137,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	// filling result with the output to print it in root "/"
 	data.Art = res.String()
-	count := 1
-	for {
-		downloadFile, err := os.Create(fmt.Sprintf("download%d.txt", count))
-		if err != nil {
-			count++
-			continue
-		}
-		data.FileTxt = res.String()
-		downloadFile.WriteString(data.FileTxt)
-		break
-	}
+	// count := 1
+	// for {
+	// 	downloadFile, err := os.Create(fmt.Sprintf("download%d.txt", count))
+	// 	if err != nil {
+	// 		count++
+	// 		continue
+	// 	}
+	// 	data.FileTxt = res.String()
+	// 	downloadFile.WriteString(data.FileTxt)
+	// 	break
+	// }
 
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, data)
@@ -175,15 +173,17 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error: Bad Request", http.StatusBadRequest)
 		return
 	}
-	f, err := os.Open(fileName)
-    if err != nil {
-        http.Error(w, "File not found", http.StatusNotFound)
-        return
-    }
-    defer f.Close()
+	// f, err := os.Open(fileName)
+	// if err != nil {
+	// 	fmt.Println(fileName)
+	//     http.Error(w, "File not found", http.StatusNotFound)
+	//     return
+	// }
+	// defer f.Close()
 	w.Header().Set("Content-Type", "application/txt")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
-	io.Copy(w, f)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", "file.txt"))
+	// io.Copy(w, f)
+	w.Write([]byte(fileName))
 }
 
 func validFont(s string) bool {
