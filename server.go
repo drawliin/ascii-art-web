@@ -137,17 +137,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	// filling result with the output to print it in root "/"
 	data.Art = res.String()
-	// count := 1
-	// for {
-	// 	downloadFile, err := os.Create(fmt.Sprintf("download%d.txt", count))
-	// 	if err != nil {
-	// 		count++
-	// 		continue
-	// 	}
-	// 	data.FileTxt = res.String()
-	// 	downloadFile.WriteString(data.FileTxt)
-	// 	break
-	// }
 
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, data)
@@ -168,22 +157,15 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error: 500 InternalServerError", http.StatusInternalServerError)
 		return
 	}
-	fileName := r.FormValue("fileName")
-	if fileName == "" {
+	art := r.FormValue("art")
+	if art == "" {
 		http.Error(w, "Error: Bad Request", http.StatusBadRequest)
 		return
 	}
-	// f, err := os.Open(fileName)
-	// if err != nil {
-	// 	fmt.Println(fileName)
-	//     http.Error(w, "File not found", http.StatusNotFound)
-	//     return
-	// }
-	// defer f.Close()
+
 	w.Header().Set("Content-Type", "application/txt")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", "file.txt"))
-	// io.Copy(w, f)
-	w.Write([]byte(fileName))
+	w.Header().Set("Content-Disposition", "attachment; filename=\"file.txt\"")
+	w.Write([]byte(art))
 }
 
 func validFont(s string) bool {
