@@ -11,7 +11,7 @@
 <body>
 
     <h1>- Ascii-art Web -</h1>
-    
+
     <form action="http://localhost:8080/ascii-art" method="POST">
         <textarea name="input" placeholder="ex: Hello" maxlength="2000" required>{{.UserInput}}</textarea>
         <div>
@@ -35,14 +35,16 @@
     </form>
 
     {{if .Art}}
-        <pre class="output">{{.Art}}</pre>
-        <form action="/download" method="GET">
-            <button type="download" name="art" value="{{.Art}}">Download</button>
-        </form>
+    <pre class="output">{{.Art}}</pre>
+    <form action="/download" method="POST">
+        <textarea name="input" hidden>{{.UserInput}}</textarea>
+        <input type="hidden" name="banner" value="{{.Font}}">
+        <button type="submit">Download</button>
+    </form>
     {{else}}
-        {{if .ErrorMsg}}
-            <p class="error">{{.ErrorMsg}}</p>
-        {{end}}
+    {{if .ErrorMsg}}
+    <p class="error">{{.ErrorMsg}}</p>
+    {{end}}
     {{end}}
 
 </body>

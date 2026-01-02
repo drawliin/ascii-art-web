@@ -2,9 +2,7 @@ package helpers
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"text/template"
 )
@@ -46,11 +44,11 @@ func AsciiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// parse data
-	err := r.ParseForm()
-	if err != nil {
-		ErrorPage(w, http.StatusInternalServerError)
+	if err := r.ParseForm(); err != nil {
+		ErrorPage(w, http.StatusBadRequest)
 		return
 	}
+
 	data := PageData{}
 	data.UserInput = strings.ReplaceAll(r.FormValue("input"), "\r", "")
 	if data.UserInput == "" || len(data.UserInput) > 2000 {
@@ -63,61 +61,23 @@ func AsciiHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bytesF, err := os.ReadFile(fmt.Sprintf("%s.txt", data.Font))
-	if err != nil {
-		ErrorPage(w, http.StatusInternalServerError)
-		return
-	}
-
-	// Split into 2d Slice
-	fontTxt := strings.ReplaceAll(string(bytesF), "\r", "")
-	arr := Split2D(fontTxt)
-
-	// Split the input by NewLine
-	lines := strings.Split(data.UserInput, "\n")
-
-	// check trailing empty string
-	if len(lines) > 1 && ContainOnlyNewLines(lines) {
-		lines = lines[:len(lines)-1]
-	}
-
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		ErrorPage(w, http.StatusInternalServerError)
 		return
 	}
 
-	var res strings.Builder
-	for _, line := range lines {
-		if line == "" {
-			res.WriteRune('\n')
-			continue
-		}
-		for j := range 8 {
-			for _, c := range line {
-				// check if valid and printable ascii
-				if c >= ' ' && c <= '~' {
-					res.WriteString(arr[c-' '][j])
-				} else {
-					data.ErrorMsg = fmt.Sprintf("Unsupported character: %q\n", c)
-					w.WriteHeader(http.StatusBadRequest)
+	// filling result with the output to print it in root "/"
+	data.Art, err = GenerateArt(data.UserInput, data.Font)
 
-					var buf bytes.Buffer
-					err = tmpl.Execute(&buf, data)
-					if err != nil {
-						ErrorPage(w, http.StatusInternalServerError)
-						return
-					}
-					buf.WriteTo(w)
-
-					return
-				}
-			}
-			res.WriteRune('\n')
+	if err != nil {
+		if ContainsUnsupportedChars(err) {
+			data.ErrorMsg = err.Error()
+		} else {
+			ErrorPage(w, http.StatusInternalServerError)
+			return
 		}
 	}
-	// filling result with the output to print it in root "/"
-	data.Art = res.String()
 
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, data)
@@ -125,26 +85,47 @@ func AsciiHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorPage(w, http.StatusInternalServerError)
 		return
 	}
+	if data.ErrorMsg != "" {
+		w.WriteHeader(http.StatusBadRequest)
+	}
 	buf.WriteTo(w)
 }
 
 func DownloadHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	if r.Method != http.MethodPost {
 		ErrorPage(w, http.StatusMethodNotAllowed)
 		return
 	}
-	err := r.ParseForm()
-	if err != nil {
-		ErrorPage(w, http.StatusInternalServerError)
-		return
-	}
-	art := r.FormValue("art")
-	if art == "" {
+
+	if err := r.ParseForm(); err != nil {
 		ErrorPage(w, http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/txt")
-	w.Header().Set("Content-Disposition", "attachment; filename=\"file.txt\"")
+	input := strings.ReplaceAll(r.FormValue("input"), "\r", "")
+	banner := r.FormValue("banner")
+
+	if input == "" || len(input) > 2000 {
+		ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+
+	if !ValidFont(banner) {
+		ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+
+	art, err := GenerateArt(input, banner)
+	if err != nil {
+		if ContainsUnsupportedChars(err) {
+			ErrorPage(w, http.StatusBadRequest)
+			return
+		}
+		ErrorPage(w, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Disposition", `attachment; filename="ascii-art.txt"`)
 	w.Write([]byte(art))
 }

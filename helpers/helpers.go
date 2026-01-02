@@ -2,7 +2,10 @@ package helpers
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
+	"os"
+	"strings"
 	"text/template"
 )
 
@@ -85,4 +88,41 @@ func ValidFont(s string) bool {
 	default:
 		return false
 	}
+}
+
+func GenerateArt(input, font string) (string, error) {
+	bytesF, err := os.ReadFile(fmt.Sprintf("%s.txt", font))
+	if err != nil {
+		return "", err
+	}
+
+	fontTxt := strings.ReplaceAll(string(bytesF), "\r", "")
+	arr := Split2D(fontTxt)
+	lines := strings.Split(input, "\n")
+
+	if len(lines) > 1 && ContainOnlyNewLines(lines) {
+		lines = lines[:len(lines)-1]
+	}
+
+	var res strings.Builder
+	for _, line := range lines {
+		if line == "" {
+			res.WriteRune('\n')
+			continue
+		}
+		for j := range 8 {
+			for _, c := range line {
+				if c < ' ' || c > '~' {
+					return "", fmt.Errorf("unsupported character: %q", c)
+				}
+				res.WriteString(arr[c-' '][j])
+			}
+			res.WriteRune('\n')
+		}
+	}
+	return res.String(), nil
+}
+
+func ContainsUnsupportedChars(err error) bool {
+	return strings.Contains(err.Error(), "unsupported character")
 }
