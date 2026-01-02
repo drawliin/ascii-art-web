@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"net/http"
 	"strings"
-	"text/template"
 )
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,13 +18,9 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Render the main HTML template
-	tmpl, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		ErrorPage(w, http.StatusInternalServerError)
-		return
-	}
+	tmpl := Cache["index.html"]
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, PageData{
+	err := tmpl.Execute(&buf, PageData{
 		UserInput: "",
 		Font:      "standard",
 		Art:       "",
@@ -61,13 +56,10 @@ func AsciiHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		ErrorPage(w, http.StatusInternalServerError)
-		return
-	}
+	tmpl := Cache["index.html"]
 
 	// filling result with the output to print it in root "/"
+	var err error
 	data.Art, err = GenerateArt(data.UserInput, data.Font)
 
 	if err != nil {

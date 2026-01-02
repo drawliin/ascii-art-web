@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"text/template"
+	"html/template"
 )
 
 type PageData struct {
@@ -20,6 +20,8 @@ type AnError struct {
 	Code    int
 	Message string
 }
+
+var Cache = make(map[string]*template.Template)
 
 // Splits banner file's content into a slice of ascii representations
 // Returns a slice of ascii represented symbols (each of them as a slice of 8 lines/strings)
@@ -59,18 +61,12 @@ func ContainOnlyNewLines(arr []string) bool {
 }
 
 func ErrorPage(w http.ResponseWriter, status int) {
-	tmpl, err := template.ParseFiles("templates/error.html")
-	if err != nil {
-		// error in the error page *o*
-		w.WriteHeader(500)
-		w.Write([]byte("500 Internal Server Error"))
-		return
-	}
+	tmpl := Cache["error.html"]
 
 	w.WriteHeader(status)
 
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, AnError{
+	err := tmpl.Execute(&buf, AnError{
 		Code:    status,
 		Message: http.StatusText(status),
 	})
