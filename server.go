@@ -4,12 +4,25 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"html/template"
 	"web/helpers"
 )
 
 const port = "8080"
 
 func main() {
+	// cache templates for better performance
+	indexTmpl, err1 := template.ParseFiles("templates/index.html")
+	errorTmpl, err2 := template.ParseFiles("templates/error.html")
+	
+	if err1 != nil || err2 != nil {
+		fmt.Println("Failed to initialize server")
+		return
+	}
+	
+	helpers.Cache["index.html"] = indexTmpl
+	helpers.Cache["error.html"] = errorTmpl
+
 	http.HandleFunc("/", helpers.RootHandler)
 	http.HandleFunc("/ascii-art", helpers.AsciiHandler)
 
