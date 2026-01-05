@@ -3,6 +3,7 @@ package helpers
 import (
 	"bytes"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -61,7 +62,6 @@ func AsciiHandler(w http.ResponseWriter, r *http.Request) {
 	// filling result with the output to print it in root "/"
 	var err error
 	data.Art, err = GenerateArt(data.UserInput, data.Font)
-
 	if err != nil {
 		if ContainsUnsupportedChars(err) {
 			data.ErrorMsg = err.Error()
@@ -119,5 +119,6 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="ascii-art.txt"`)
+	w.Header().Set("Content-Length", strconv.Itoa(len(art)))
 	w.Write([]byte(art))
 }
