@@ -37,7 +37,7 @@
     {{if .Art}}
     <pre class="output">{{.Art}}</pre>
     <form action="/download" method="POST">
-        <textarea name="input" hidden>{{.UserInput}}</textarea>
+        <textarea name="input" maxlength="2000" hidden>{{.UserInput}}</textarea>
         <input type="hidden" name="banner" value="{{.Font}}">
         <button type="submit">Download</button>
     </form>
